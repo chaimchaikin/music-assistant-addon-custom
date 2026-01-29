@@ -1,9 +1,13 @@
 ARG BUILD_FROM=ghcr.io/music-assistant/server
 FROM ${BUILD_FROM}
 
-# Set custom environment variables
-ENV HTTP_PROXY=10.0.0.1:8080
-ENV HTTPS_PROXY=10.0.0.1:8080
+# Install mitmproxy
+RUN apk add --no-cache mitmproxy
 
-# The base image already contains the Music Assistant server
-# This Dockerfile extends it with custom environment configuration
+# Set up mitmproxy to run in local mode
+# ENV HTTP_PROXY=localhost:8080
+# ENV HTTPS_PROXY=localhost:8080
+ENV REQUESTS_CA_BUNDLE=/root/.mitmproxy/mitmproxy-ca-cert.pem
+
+# Start mitmproxy in local mode alongside Music Assistant
+CMD mitmproxy --mode local --set block_global=false & exec /bin/bash /entrypoint.sh
